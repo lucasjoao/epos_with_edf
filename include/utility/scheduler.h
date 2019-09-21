@@ -97,6 +97,18 @@ namespace Scheduling_Criteria
     public:
         FCFS(int p = NORMAL); // Defined at Alarm
     };
+
+    // Earliest deadline first (EDF)
+    class EDF: public Priority
+    {
+    public:
+        static const bool timed = false;
+        static const bool dynamic = true;
+        static const bool preemptive = true;
+
+    public:
+        EDF(int p = NORMAL): Priority(p) {}
+    };
 }
 
 
