@@ -106,8 +106,9 @@ namespace Scheduling_Criteria
         static const bool dynamic = true;
         static const bool preemptive = true;
 
-    public:
         EDF(int p = NORMAL): Priority(p) {}
+
+        void update() {}
     };
 }
 
