@@ -1,86 +1,75 @@
 #include <utility/ostream.h>
-#include <synchronizer.h>
 #include <real-time.h>
-
 
 using namespace EPOS;
 
 OStream cout;
 
-int T1()
-{
-    TSC_Chronometer chron;
+int function_thread01() {
+    TSC_Chronometer chronometer;
     do {
-        chron.reset();
-        chron.start();
-        cout << "T1 started:" << endl;
-        for(;chron.read() < 500000 - 5000;);
-        chron.stop();
-        cout << "Thread 1: finished in " << chron.read() << " microseconds" << endl;
-        chron.reset();
-    } while(Periodic_Thread::wait_next());
+        chronometer.reset();
+        chronometer.start();
+        cout <<  "start thread01" << endl;
+        for(; chronometer.read() < 1000000; );
+        chronometer.stop();
+        cout << "thread01 terminou em " << chronometer.read() << " microseconds" << endl;
+        chronometer.reset();
+    } while (Periodic_Thread::wait_next());
     return 0;
 }
-int T2()
-{
-    TSC_Chronometer chron;
+int function_thread02() {
+    TSC_Chronometer chronometer;
     do {
-        chron.reset();
-        chron.start();
-        cout << "T2 started:" << endl;
-        for(;chron.read() < 1000000 - 10000;);
-        chron.stop();
-        cout << "Thread 2: finished in " << chron.read() << " microseconds" << endl;
-        chron.reset();
-    } while(Periodic_Thread::wait_next());
-    return 0;
-}
-
-int T3()
-{
-    TSC_Chronometer chron;
-    do {
-        chron.reset();
-        chron.start();
-        cout << "T3 started:" << endl;
-        for(;chron.read() < 2000000 - 20000;);
-        chron.stop();
-        cout << "Thread 3: finished in " << chron.read() << " microseconds" << endl;
-        chron.reset();
-    } while(Periodic_Thread::wait_next());
+        chronometer.reset();
+        chronometer.start();
+        cout << "start thread02" << endl;
+        for(; chronometer.read() < 2000000; );
+        chronometer.stop();
+        cout << "thread02 terminou em " << chronometer.read() << " microseconds" << endl;
+        chronometer.reset();
+    } while (Periodic_Thread::wait_next());
     return 0;
 }
 
-int test() {
-    TSC_Chronometer chron;
-    chron.start();
-    for(int i = 0; chron.read() < 20000; i++);
-    chron.stop();
-    cout << "Thread 3: finished in " << chron.read() << " microseconds" << endl;
-    chron.reset();
+int function_thread03() {
+    TSC_Chronometer chronometer;
+    do {
+        chronometer.reset();
+        chronometer.start();
+        cout << "start thread03" << endl;
+        for(; chronometer.read() < 3000000; );
+        chronometer.stop();
+        cout << "thread03 terminou em " << chronometer.read() << " microseconds" << endl;
+        chronometer.reset();
+    } while (Periodic_Thread::wait_next());
+    return 0;
 }
-int main()
-{
-    //Thread *t = new Thread(&test);
-    const unsigned long m1 = 3000000;
-    Periodic_Thread::Configuration c1(m1, 5);
 
-    const unsigned long m2 = 4000000;
-    Periodic_Thread::Configuration c2(m2, 5);
+int main() {
+    // https://microcontrollerslab.com/earliest-deadline-first-scheduling/
+    // teste tenta simular exemplo da figura 2 do link
+    // lembrando que no exemplo há vários momentos em que a prioridade é a mesma,
+    // e com isso a thread escolhida para execução é aleatória
 
-    const unsigned long m3 = 6000000;
-    Periodic_Thread::Configuration c3(m3, 5);
-    Periodic_Thread *tr1 = new Periodic_Thread(c1, &T1);
-    Periodic_Thread *tr2 = new Periodic_Thread(c2, &T2);
-    Periodic_Thread *tr3 = new Periodic_Thread(c3, &T3);
+    const unsigned long period01 = 4000000;
+    const unsigned long period02 = 6000000;
+    const unsigned long period03 = 8000000;
 
-    tr1->join();
-    tr2->join();
-    tr3->join();
+    Periodic_Thread::Configuration config01(period01, 6);
+    Periodic_Thread::Configuration config02(period02, 4);
+    Periodic_Thread::Configuration config03(period03, 3);
 
-    delete tr1;
-    delete tr2;
-    delete tr3;
-   // t->join();
+    Periodic_Thread *thread01 = new Periodic_Thread(config01, &function_thread01);
+    Periodic_Thread *thread02 = new Periodic_Thread(config02, &function_thread02);
+    Periodic_Thread *thread03 = new Periodic_Thread(config03, &function_thread03);
+
+    thread01->join();
+    thread02->join();
+    thread03->join();
+
+    delete thread01;
+    delete thread02;
+    delete thread03;
     return 0;
 }
